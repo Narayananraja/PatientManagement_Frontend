@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from '../axiosConfig';
-import { useNavigate, Link } from 'react-router-dom'; // Import Link
+import { useNavigate, Link } from 'react-router-dom';
 import '../styles/Profile.css';
 
 const Profile = () => {
@@ -124,11 +124,11 @@ const Profile = () => {
                     </div>
                     <div className="mb-3">
                         <label className="form-label"><strong>Disease:</strong></label>
-                        <input
-                            type="text"
+                        <textarea
                             className="form-control"
                             value={updatedDisease}
                             onChange={(e) => setUpdatedDisease(e.target.value)}
+                            rows={3} // You can adjust the number of rows
                         />
                     </div>
                     <button className="btn btn-primary" onClick={handleUpdate}>Update Profile</button>
