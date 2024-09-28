@@ -33,7 +33,7 @@ const PatientListPage = () => {
 
     const handleDelete = async (patientId) => {
         try {
-            await axios.delete(`/patients/${patientId}`);
+            await axios.delete(`/${patientId}`);
             setPatients(patients.filter((patient) => patient.id !== patientId));
         } catch (error) {
             console.error('Error deleting patient:', error);
@@ -43,12 +43,17 @@ const PatientListPage = () => {
     const handleSave = async () => {
         try {
             const updatedEmail = editedPatient.email;
+            const originalPatient = patients.find(patient => patient.id === editPatientId);
 
             // If the email has changed, check for availability
-            if (updatedEmail !== patients.find(patient => patient.id === editPatientId).email) {
+            if (updatedEmail !== originalPatient.email) {
                 const emailCheckResponse = await axios.get(`/check-email/${updatedEmail}`);
                 if (!emailCheckResponse.data.available) {
                     setError('Email already in use. Please use a different email.');
+                    // Hide the error message after 5 seconds
+                    setTimeout(() => {
+                        setError('');
+                    }, 5000); // Change to 5000ms for 5 seconds
                     return;
                 }
             }
@@ -56,11 +61,10 @@ const PatientListPage = () => {
             // If password field is empty, retain the original password
             const updatedPatient = { ...editedPatient };
             if (!updatedPatient.password) {
-                const originalPatient = patients.find(patient => patient.id === editPatientId);
                 updatedPatient.password = originalPatient.password; // Keep original password
             }
 
-            await axios.put(`/patients/${editPatientId}`, updatedPatient);
+            await axios.put(`/${editPatientId}`, updatedPatient);
             setPatients(
                 patients.map((patient) =>
                     patient.id === editPatientId ? updatedPatient : patient
@@ -82,7 +86,7 @@ const PatientListPage = () => {
         <div className="patients-list mt-5">
             <div className="d-flex justify-content-between mb-4">
                 <h3>All Patients:</h3>
-                <Link to="/register" className="btn btn-secondary">Register</Link>
+                <Link to="/register" state={{ fromPatientList: true }} className="btn btn-secondary">Register</Link>
             </div>
             {error && <p className="text-danger">{error}</p>}
             <table className="table table-striped">
@@ -93,7 +97,7 @@ const PatientListPage = () => {
                         <th>Contact</th>
                         <th>Age</th>
                         <th>Disease</th>
-                        <th>Actions</th>
+                        <th  className="">Actions</th> {/* Align the header to the right */}
                     </tr>
                 </thead>
                 <tbody>
@@ -138,15 +142,15 @@ const PatientListPage = () => {
                                         />
                                     </td>
                                     <td>
-                                        <input
-                                            type="text"
+                                        <textarea
                                             className="form-control"
                                             name="disease"
                                             value={editedPatient.disease}
                                             onChange={handleChange}
+                                            rows={1} // Adjust rows as necessary
                                         />
                                     </td>
-                                    <td>
+                                    <td className=""> {/* Align buttons to the right */}
                                         <button className="btn btn-success me-2" onClick={handleSave}>Save</button>
                                         <button className="btn btn-secondary" onClick={() => setEditPatientId(null)}>Cancel</button>
                                     </td>
@@ -158,7 +162,7 @@ const PatientListPage = () => {
                                     <td>{patient.contact}</td>
                                     <td>{patient.age}</td>
                                     <td>{patient.disease}</td>
-                                    <td>
+                                    <td className=""> {/* Align buttons to the right */}
                                         <button className="btn btn-warning me-2" onClick={() => handleEdit(patient)}>Edit</button>
                                         <button className="btn btn-danger" onClick={() => handleDelete(patient.id)}>Delete</button>
                                     </td>

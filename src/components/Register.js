@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import axios from '../axiosConfig';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import '../styles/Register.css';
+
 const Register = () => {
     const [name, setName] = useState('');
     const [age, setAge] = useState('');
@@ -12,6 +13,7 @@ const Register = () => {
     const [success, setSuccess] = useState('');
     const [error, setError] = useState('');
     const navigate = useNavigate();
+    const location = useLocation();
 
     const handleRegister = async (e) => {
         e.preventDefault();
@@ -19,7 +21,15 @@ const Register = () => {
             await axios.post('/register', { name, age, contact, disease, password, email });
             setSuccess('Registration successful! You can now login.');
             setError('');
-            navigate('/login');
+
+            // Check if coming from PatientListPage
+            if (location.state?.fromPatientList) {
+                // Redirect to PatientListPage
+                navigate('/patients-list');
+            } else {
+                // Redirect to login page
+                navigate('/login');
+            }
         } catch (error) {
             setError(error.response.data);
             setSuccess('');
