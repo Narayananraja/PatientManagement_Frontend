@@ -31,8 +31,8 @@ const Register = () => {
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <h2 className="text-center">Register</h2>
                 <div>
-                    <Link to="/" className="btn btn-link">Home</Link>
-                    <Link to="/login" className="btn btn-link">Login</Link>
+                    <Link to="/" className="btn btn-primary me-2">Home</Link>
+                    <Link to="/login" className="btn btn-secondary">Login</Link>
                 </div>
             </div>
             {success && <div className="alert alert-success">{success}</div>}
