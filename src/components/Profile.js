@@ -1,175 +1,141 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from '../axiosConfig';
-import { useNavigate, Link } from 'react-router-dom';
-import '../styles/AdminLogin.css';
+import { useNavigate, Link } from 'react-router-dom'; // Import Link
+import '../styles/Profile.css';
 
-const PatientListPage = () => {
-    const [patients, setPatients] = useState([]);
-    const [editPatientId, setEditPatientId] = useState(null);
-    const [editedPatient, setEditedPatient] = useState({});
+const Profile = () => {
+    const [patient, setPatient] = useState(null);
+    const [updatedName, setUpdatedName] = useState('');
+    const [updatedEmail, setUpdatedEmail] = useState('');
+    const [updatedAge, setUpdatedAge] = useState('');
+    const [updatedContact, setUpdatedContact] = useState('');
+    const [updatedDisease, setUpdatedDisease] = useState('');
     const [error, setError] = useState('');
     const navigate = useNavigate();
 
-    // Fetch patients when component mounts
     useEffect(() => {
-        const fetchPatients = async () => {
+        const fetchPatientDetails = async () => {
+            const patientId = localStorage.getItem('patientId');
+
+            if (!patientId) {
+                alert('No patient ID found. Please log in again.');
+                navigate('/login');
+                return;
+            }
+
             try {
-                const response = await axios.get('/patients-list'); // API call to get patients
-                setPatients(response.data);
+                const response = await axios.get(`/${patientId}`);
+                setPatient(response.data);
+                setUpdatedName(response.data.name);
+                setUpdatedEmail(response.data.email);
+                setUpdatedAge(response.data.age);
+                setUpdatedContact(response.data.contact);
+                setUpdatedDisease(response.data.disease);
             } catch (error) {
-                console.error('Error fetching patients:', error);
-                setError('Could not load patients. Please try again later.');
+                console.error('Error fetching patient details:', error);
             }
         };
 
-        fetchPatients();
-    }, []);
+        fetchPatientDetails();
+    }, [navigate]);
 
-    const handleEdit = (patient) => {
-        setEditPatientId(patient.id);
-        // Include password in the edited patient state, but don't allow it to be updated unless changed
-        setEditedPatient({ ...patient, password: '' }); // Clear password for security
-    };
+    const handleUpdate = async () => {
+        const updatedPatient = {
+            name: updatedName,
+            email: updatedEmail,
+            age: updatedAge,
+            contact: updatedContact,
+            disease: updatedDisease,
+            password: patient.password,
+        };
 
-    const handleDelete = async (patientId) => {
         try {
-            await axios.delete(`/patients/${patientId}`);
-            setPatients(patients.filter((patient) => patient.id !== patientId));
-        } catch (error) {
-            console.error('Error deleting patient:', error);
-        }
-    };
-
-    const handleSave = async () => {
-        try {
-            const updatedEmail = editedPatient.email;
-
-            // If the email has changed, check for availability
-            if (updatedEmail !== patients.find(patient => patient.id === editPatientId).email) {
+            if (updatedEmail !== patient.email) {
                 const emailCheckResponse = await axios.get(`/check-email/${updatedEmail}`);
                 if (!emailCheckResponse.data.available) {
-                    setError('Email already in use. Please use a different email.');
+                    setError('Email already in use.');
                     return;
                 }
             }
 
-            // If password field is empty, retain the original password
-            const updatedPatient = { ...editedPatient };
-            if (!updatedPatient.password) {
-                const originalPatient = patients.find(patient => patient.id === editPatientId);
-                updatedPatient.password = originalPatient.password; // Keep original password
-            }
-
-            await axios.put(`/patients/${editPatientId}`, updatedPatient);
-            setPatients(
-                patients.map((patient) =>
-                    patient.id === editPatientId ? updatedPatient : patient
-                )
-            );
-            setEditPatientId(null);
+            await axios.put(`/${patient.id}`, updatedPatient);
+            alert('Profile updated successfully!');
             setError('');
         } catch (error) {
-            console.error('Error updating patient:', error);
-            setError('An error occurred while updating the patient.');
+            console.error('Error updating patient profile:', error);
+            setError('An error occurred while updating the profile.');
         }
     };
 
-    const handleChange = (e) => {
-        setEditedPatient({ ...editedPatient, [e.target.name]: e.target.value });
+    const handleLogout = () => {
+        localStorage.removeItem('patientId'); // Clear patient ID from local storage
+        navigate('/login'); // Redirect to login page
     };
 
+    if (!patient) return <p>Loading...</p>;
+
     return (
-        <div className="patients-list mt-5">
-            <div className="d-flex justify-content-between mb-4">
-                <h3>All Patients:</h3>
-                <Link to="/register" className="btn btn-secondary">Register</Link>
+        <div className="profile-container mt-5">
+            <div className="d-flex justify-content-between align-items-center mb-4">
+                <h2 className="text-center">Patient Profile</h2>
+                <div>
+                    <Link to="/" className="btn btn-secondary me-2">Home</Link> {/* Home link */}
+                    <button className="btn btn-danger" onClick={handleLogout}>Logout</button> {/* Logout button */}
+                </div>
             </div>
-            {error && <p className="text-danger">{error}</p>}
-            <table className="table table-striped">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Contact</th>
-                        <th>Age</th>
-                        <th>Disease</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {patients.map((patient) => (
-                        <tr key={patient.id}>
-                            {editPatientId === patient.id ? (
-                                <>
-                                    <td>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            name="name"
-                                            value={editedPatient.name}
-                                            onChange={handleChange}
-                                        />
-                                    </td>
-                                    <td>
-                                        <input
-                                            type="email"
-                                            className="form-control"
-                                            name="email"
-                                            value={editedPatient.email}
-                                            onChange={handleChange}
-                                        />
-                                    </td>
-                                    <td>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            name="contact"
-                                            value={editedPatient.contact}
-                                            onChange={handleChange}
-                                        />
-                                    </td>
-                                    <td>
-                                        <input
-                                            type="number"
-                                            className="form-control"
-                                            name="age"
-                                            value={editedPatient.age}
-                                            onChange={handleChange}
-                                        />
-                                    </td>
-                                    <td>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            name="disease"
-                                            value={editedPatient.disease}
-                                            onChange={handleChange}
-                                        />
-                                    </td>
-                                    <td>
-                                        <button className="btn btn-success me-2" onClick={handleSave}>Save</button>
-                                        <button className="btn btn-secondary" onClick={() => setEditPatientId(null)}>Cancel</button>
-                                    </td>
-                                </>
-                            ) : (
-                                <>
-                                    <td>{patient.name}</td>
-                                    <td>{patient.email}</td>
-                                    <td>{patient.contact}</td>
-                                    <td>{patient.age}</td>
-                                    <td>{patient.disease}</td>
-                                    <td>
-                                        <button className="btn btn-warning me-2" onClick={() => handleEdit(patient)}>Edit</button>
-                                        <button className="btn btn-danger" onClick={() => handleDelete(patient.id)}>Delete</button>
-                                    </td>
-                                </>
-                            )}
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+            {error && <p style={{ color: 'red' }}>{error}</p>}
+            <div className="card">
+                <div className="card-body">
+                    <div className="mb-3">
+                        <label className="form-label"><strong>Name:</strong></label>
+                        <input
+                            type="text"
+                            className="form-control"
+                            value={updatedName}
+                            onChange={(e) => setUpdatedName(e.target.value)}
+                        />
+                    </div>
+                    <div className="mb-3">
+                        <label className="form-label"><strong>Email:</strong></label>
+                        <input
+                            type="email"
+                            className="form-control"
+                            value={updatedEmail}
+                            onChange={(e) => setUpdatedEmail(e.target.value)}
+                        />
+                    </div>
+                    <div className="mb-3">
+                        <label className="form-label"><strong>Age:</strong></label>
+                        <input
+                            type="number"
+                            className="form-control"
+                            value={updatedAge}
+                            onChange={(e) => setUpdatedAge(e.target.value)}
+                        />
+                    </div>
+                    <div className="mb-3">
+                        <label className="form-label"><strong>Contact:</strong></label>
+                        <input
+                            type="text"
+                            className="form-control"
+                            value={updatedContact}
+                            onChange={(e) => setUpdatedContact(e.target.value)}
+                        />
+                    </div>
+                    <div className="mb-3">
+                        <label className="form-label"><strong>Disease:</strong></label>
+                        <input
+                            type="text"
+                            className="form-control"
+                            value={updatedDisease}
+                            onChange={(e) => setUpdatedDisease(e.target.value)}
+                        />
+                    </div>
+                    <button className="btn btn-primary" onClick={handleUpdate}>Update Profile</button>
+                </div>
+            </div>
         </div>
     );
 };
 
-export default PatientListPage;
+export default Profile;
