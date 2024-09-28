@@ -10,24 +10,33 @@ const PatientListPage = () => {
     const [error, setError] = useState('');
     const navigate = useNavigate();
 
-    // Fetch patients when component mounts
-    useEffect(() => {
-        const fetchPatients = async () => {
-            try {
-                const response = await axios.get('/patients-list'); // API call to get patients
-                setPatients(response.data);
-            } catch (error) {
-                console.error('Error fetching patients:', error);
-                setError('Could not load patients. Please try again later.');
-            }
-        };
+    // Function to check if the user is an admin
+    const isAdmin = () => {
+        const user = JSON.parse(localStorage.getItem('user')); // Example: fetching user data from local storage
+        return user && user.role === 'admin'; // Adjust according to your user object structure
+    };
 
-        fetchPatients();
-    }, []);
+    // Fetch patients and check admin status when component mounts
+    useEffect(() => {
+        if (!isAdmin()) {
+            navigate('/'); // Redirect to home or login page if not admin
+        } else {
+            const fetchPatients = async () => {
+                try {
+                    const response = await axios.get('/patients-list'); // API call to get patients
+                    setPatients(response.data);
+                } catch (error) {
+                    console.error('Error fetching patients:', error);
+                    setError('Could not load patients. Please try again later.');
+                }
+            };
+
+            fetchPatients();
+        }
+    }, [navigate]);
 
     const handleEdit = (patient) => {
         setEditPatientId(patient.id);
-        // Include password in the edited patient state, but don't allow it to be updated unless changed
         setEditedPatient({ ...patient, password: '' }); // Clear password for security
     };
 
@@ -45,23 +54,21 @@ const PatientListPage = () => {
             const updatedEmail = editedPatient.email;
             const originalPatient = patients.find(patient => patient.id === editPatientId);
 
-            // If the email has changed, check for availability
+            // Check for email availability if it has changed
             if (updatedEmail !== originalPatient.email) {
                 const emailCheckResponse = await axios.get(`/check-email/${updatedEmail}`);
                 if (!emailCheckResponse.data.available) {
                     setError('Email already in use. Please use a different email.');
-                    // Hide the error message after 5 seconds
                     setTimeout(() => {
                         setError('');
-                    }, 5000); // Change to 5000ms for 5 seconds
+                    }, 5000); // Hide error message after 5 seconds
                     return;
                 }
             }
 
-            // If password field is empty, retain the original password
             const updatedPatient = { ...editedPatient };
             if (!updatedPatient.password) {
-                updatedPatient.password = originalPatient.password; // Keep original password
+                updatedPatient.password = originalPatient.password; // Keep original password if not updated
             }
 
             await axios.put(`/${editPatientId}`, updatedPatient);
@@ -97,7 +104,7 @@ const PatientListPage = () => {
                         <th>Contact</th>
                         <th>Age</th>
                         <th>Disease</th>
-                        <th  className="">Actions</th> {/* Align the header to the right */}
+                        <th className="">Actions</th> {/* Align the header to the right */}
                     </tr>
                 </thead>
                 <tbody>

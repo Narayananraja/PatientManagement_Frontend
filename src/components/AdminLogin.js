@@ -14,6 +14,11 @@ const handleLogin = async (e) => {
     try {
         const response = await axios.post('/admin', { email, password });
         if (response.status === 200) {
+            const userData = {
+               email: email,
+               role: 'admin',
+            };
+            localStorage.setItem('user', JSON.stringify(userData));
             // If login is successful, navigate to patients list
             navigate('/patients-list');
             setError('');
