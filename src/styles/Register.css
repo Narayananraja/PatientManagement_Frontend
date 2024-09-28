@@ -1,0 +1,6 @@
+
+.register-container {
+    max-width: 600px !important; /* Set the maximum width for the container */
+    margin: auto; /* Center the container */
+    padding: 20px; /* Add padding */
+}

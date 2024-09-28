@@ -1,0 +1,17 @@
+/* src/components/Home.css */
+
+.jumbotron {
+    background-color: #f8f9fa; /* Light background */
+    border: 1px solid #e9ecef; /* Border around the jumbotron */
+    width: 100%; /* Full width */
+    margin: 0; /* Remove margin for full width */
+    padding: 2rem; /* Adjust padding */
+}
+
+footer {
+    bottom: 0;
+    width: 100%;
+    text-align: center;
+    padding: 10px 0;
+    background-color: #f1f1f1; /* Footer background */
+}
