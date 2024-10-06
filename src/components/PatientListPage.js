@@ -12,7 +12,8 @@ const PatientListPage = () => {
 
     // Function to check if the user is an admin
     const isAdmin = () => {
-        const user = JSON.parse(localStorage.getItem('user')); // Example: fetching user data from local storage
+    
+const user = JSON.parse(localStorage.getItem('user')); // Example: fetching user data from local storage
         return user && user.role === 'admin'; // Adjust according to your user object structure
     };
 
@@ -94,6 +95,7 @@ const PatientListPage = () => {
             <div className="d-flex justify-content-between mb-4">
                 <h3>All Patients:</h3>
                 <Link to="/register" state={{ fromPatientList: true }} className="btn btn-secondary">Register</Link>
+                <Link to="/doctorRegistration" state={{}} className="btn btn-secondary">ADD Doctor</Link>
             </div>
             {error && <p className="text-danger">{error}</p>}
             <table className="table table-striped">

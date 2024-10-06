@@ -36,6 +36,8 @@ const handleLogin = async (e) => {
                 <div>
                     <Link to="/" className="btn btn-secondary me-3">Home</Link>
                     <Link to="/register" className="btn btn-secondary">Register</Link> {/* Register Link */}
+                    <Link to="/doctorRegistration" className="btn btn-secondary">AddDoctor</Link>
+                    
                 </div>
             </div>
 

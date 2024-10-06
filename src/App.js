@@ -7,6 +7,8 @@ import PatientListPage from './components/PatientListPage';
 import Login from './components/Login';
 import Register from './components/Register';
 import Profile from './components/Profile';
+import DoctorRegistration from './components/DoctorRegistration';
+import DoctorListPage from './components/DoctorListPage';
 import './App.css';
 import PrivateRoute from './components/PrivateRoute';
 
@@ -24,6 +26,8 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/doctorRegistration" element={<DoctorRegistration/>}/>
+          <Route path="/doctors-list" element={<DoctorListPage/>}/>
         </Routes>
       </div>
     </Router>
