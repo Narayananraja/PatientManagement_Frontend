@@ -45,7 +45,7 @@ const DoctorListPage = () => {
         }
     };
     const save =async() =>{
-     await axios.put(`/${editDoctorId}`, editedDoctor);
+     await axios.put(`doctor/${editDoctorId}`, editedDoctor);
      try{
     setDoctor(
         doctor.map((patient) =>
